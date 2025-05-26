@@ -1,0 +1,160 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Class Reminder</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(to right, #e0f7fa, #e8f5e9);
+      color: #333;
+      margin: 0;
+      padding: 0;
+    }
+    header {
+      text-align: center;
+      background: #43a047;
+      color: white;
+      padding: 1.5em;
+      border-radius: 0 0 20px 20px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+    }
+    .reminder {
+      text-align: center;
+      margin: 30px auto;
+      font-size: 1.3em;
+      padding: 20px;
+      background: #ffffff;
+      width: 90%;
+      max-width: 800px;
+      border-radius: 15px;
+      box-shadow: 0 6px 12px rgba(0,0,0,0.1);
+    }
+    .container {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin: 20px;
+    }
+    .schedule {
+      background: white;
+      padding: 20px;
+      margin: 15px;
+      border-radius: 15px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      width: 90%;
+      max-width: 450px;
+    }
+    .schedule h2 {
+      color: #2e7d32;
+      text-align: center;
+      border-bottom: 2px solid #c8e6c9;
+      padding-bottom: 10px;
+    }
+    .schedule ul {
+      list-style-type: none;
+      padding: 0;
+    }
+    .schedule li {
+      padding: 10px;
+      margin-bottom: 10px;
+      background: #f1f8e9;
+      border-left: 6px solid #66bb6a;
+      border-radius: 6px;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Class Reminder</h1>
+    <p>Stay updated with your next classes</p>
+  </header>
+
+  <div class="reminder">
+    <h3 id="samia-reminder">Loading Samia's reminder...</h3>
+    <h3 id="ajmain-reminder">Loading Ajmain's reminder...</h3>
+  </div>
+
+  <div class="container">
+    <div class="schedule">
+      <h2>Samia Heera</h2>
+      <ul id="samia-schedule"></ul>
+    </div>
+
+    <div class="schedule">
+      <h2>Ajmain Zwad</h2>
+      <ul id="ajmain-schedule"></ul>
+    </div>
+  </div>
+
+  <script>
+    const samiaSchedule = [
+      { day: 1, time: "11:20", desc: "SAC311" },
+      { day: 1, time: "13:00", desc: "SAC211" },
+      { day: 2, time: "14:40", desc: "SAC501 Lab" },
+      { day: 3, time: "11:20", desc: "SAC311" },
+      { day: 3, time: "13:00", desc: "SAC211" },
+      { day: 4, time: "13:00", desc: "LIB606 Lab" },
+      { day: 4, time: "14:40", desc: "SAC206" },
+      { day: 6, time: "08:00", desc: "SAC507" },
+      { day: 6, time: "14:40", desc: "SAC206" },
+    ];
+
+    const ajmainSchedule = [
+      { day: 0, time: "14:40", desc: "SAC313" },
+      { day: 1, time: "18:00", desc: "SAC211" },
+      { day: 2, time: "14:40", desc: "SAC313" },
+      { day: 3, time: "18:00", desc: "SAC211" },
+      { day: 4, time: "08:00", desc: "NAC208" },
+      { day: 4, time: "16:20", desc: "SAC207" },
+      { day: 6, time: "08:00", desc: "NAC208" },
+      { day: 6, time: "16:20", desc: "SAC207" },
+    ];
+
+    const weekdays = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+
+    function renderSchedules() {
+      document.getElementById('samia-schedule').innerHTML = samiaSchedule.map(c => `<li>${weekdays[c.day]}: ${c.desc}, ${c.time}</li>`).join('');
+      document.getElementById('ajmain-schedule').innerHTML = ajmainSchedule.map(c => `<li>${weekdays[c.day]}: ${c.desc}, ${c.time}</li>`).join('');
+    }
+
+    function updateReminders() {
+      const now = new Date();
+
+      function nextClass(schedule) {
+        let soonest = null;
+        for (let cls of schedule) {
+          const dt = new Date();
+          dt.setDate(dt.getDate() + ((cls.day - now.getDay() + 7) % 7));
+          const [h, m] = cls.time.split(":" ).map(Number);
+          dt.setHours(h, m, 0, 0);
+          if (dt > now && (!soonest || dt < soonest)) {
+            soonest = dt;
+            soonest.cls = cls;
+          }
+        }
+        return soonest;
+      }
+
+      const sNext = nextClass(samiaSchedule);
+      const aNext = nextClass(ajmainSchedule);
+
+      if (sNext) {
+        const diff = Math.floor((sNext - now) / 60000);
+        document.getElementById("samia-reminder").textContent = `Samia's next class: ${sNext.cls.desc} on ${weekdays[sNext.cls.day]} at ${sNext.cls.time} (${Math.floor(diff / 60)}h ${diff % 60}m left)`;
+      }
+
+      if (aNext) {
+        const diff = Math.floor((aNext - now) / 60000);
+        document.getElementById("ajmain-reminder").textContent = `Ajmain's next class: ${aNext.cls.desc} on ${weekdays[aNext.cls.day]} at ${aNext.cls.time} (${Math.floor(diff / 60)}h ${diff % 60}m left)`;
+      }
+    }
+
+    renderSchedules();
+    updateReminders();
+    setInterval(updateReminders, 60000);
+  </script>
+</body>
+</html>
